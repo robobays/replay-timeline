@@ -1,0 +1,11 @@
+{
+  "name": "replay-timeline",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node ./src/extract.js"
+  },
+  "dependencies": {
+    "seek-bzip": "^2.0.0"
+  }
+}
