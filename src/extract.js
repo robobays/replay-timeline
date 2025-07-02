@@ -1,13 +1,12 @@
-import { buffer } from "node:stream/consumers";
+import { MpqFile } from "@robobays/mpq-reader";
 import MapInfo from "./mapinfo.js";
-import MpqFile from "./mpq/MpqFile.js";
 import Replay from "./replay/replay.js";
 import output from "./output/svg.js";
 import getTimeline from "./timeline/timeline.js";
 
 async function extract() {
   try {
-    const mpq = new MpqFile(await buffer(process.stdin));
+    const mpq = await MpqFile.load();
     const replay = new Replay(mpq);
     const mapinfo = new MapInfo(replay.mapFileName);
 

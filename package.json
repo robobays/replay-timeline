@@ -6,6 +6,6 @@
     "start": "node ./src/extract.js"
   },
   "dependencies": {
-    "seek-bzip": "^2.0.0"
+    "@robobays/mpq-reader": "^1.0.0"
   }
 }
