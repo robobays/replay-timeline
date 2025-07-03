@@ -1,4 +1,4 @@
-Translates SC2Replays file into timelines.
+Translates SC2Replay file into timeline.
 
 ### Use
 

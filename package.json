@@ -1,9 +1,24 @@
 {
-  "name": "replay-timeline",
-  "version": "1.0.0",
+  "name": "@robobays/replay-timeline",
+  "description": "Translates SC2Replay file into timeline.",
+  "version": "0.0.0",
   "type": "module",
+  "main": "src/start.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robobays/replay-timeline.git"
+  },
+  "homepage": "https://github.com/robobays/replay-timeline#readme",
+  "bugs": {
+    "url": "https://github.com/robobays/replay-timeline/issues"
+  },
+  "keywords": [
+    "SC2Replay"
+  ],
+  "author": "Stephan Zlatarev",
+  "license": "The Unlicense",
   "scripts": {
-    "start": "node ./src/extract.js"
+    "start": "node ./src/start.js"
   },
   "dependencies": {
     "@robobays/mpq-reader": "^1.0.0"

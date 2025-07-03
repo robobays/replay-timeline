@@ -7,4 +7,4 @@ RUN npm install --only=production
 
 COPY src ./src
 
-CMD [ "node", "./src/extract.js" ]
+CMD [ "node", "./src/start.js" ]
