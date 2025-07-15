@@ -4,7 +4,11 @@ const SIZE_CELL = 60;
 const SIZE_MAP = SIZE_CELL * 3;
 const SHOW_RULE_GRID = false;
 
-export default async function(out, timeline, mapinfo) {
+export default async function(out, timeline, params) {
+  if (!params.map) throw new Error("No map name is provided.");
+
+  const mapname = params.map.replace(".SC2Map", "");
+  const mapsize = await getMapSize(mapname);
   const minutes = splitByMinute(timeline);
   const size = calculateSvgSize(minutes);
   const svg = [];
@@ -13,16 +17,27 @@ export default async function(out, timeline, mapinfo) {
   svg.push(`<g style="user-select: none; font-family: 'Arial Narrow', Arial, sans-serif;">`);
 
   drawGrid(svg, size);
-  drawMaps(svg, minutes, mapinfo.filename, await mapinfo.size());
+  drawMaps(svg, minutes, mapname, mapsize);
   drawStats(svg, minutes);
   drawFights(svg, minutes);
   drawClock(svg, minutes);
-  drawSeparators(svg, size, minutes)
+  drawSeparators(svg, size, minutes);
 
   svg.push(`</g>`);
   svg.push(`</svg>`);
 
   out.write(svg.join("\n"));
+}
+
+async function getMapSize(mapname) {
+  const url = `https://robobays.github.io/images/map/${mapname}.json`;
+  const response = await fetch(url);
+
+  if (response.ok) {
+    return await response.json();
+  } else {
+    throw new Error(`Failed to load map info: ${url}`);
+  }
 }
 
 function splitByMinute(timeline) {
@@ -124,7 +139,7 @@ function drawMap(svg, minute, mapname, mapsize) {
 
   const width = SIZE_CELL * 3;
   const height = SIZE_CELL * 3;
-  const srcmap = "https://robobays.github.io/images/map/" + mapname.replace(".SC2Map", "") + ".jpg";
+  const srcmap = `https://robobays.github.io/images/map/${mapname}.jpg`;
 
   svg.push(`<image width="${width}" height="${height}" href="${srcmap}" />`);
 
