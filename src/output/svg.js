@@ -10,17 +10,18 @@ export default async function(timeline, options) {
   const mapname = options.map.replace(".SC2Map", "");
   const mapsize = await getMapSize(mapname);
   const minutes = splitByMinute(timeline);
-  const size = calculateSvgSize(minutes);
+  const sidecols = (options.width > SIZE_MAP + SIZE_CELL * 8) ? Math.floor((options.width - SIZE_MAP) / 2 / SIZE_CELL) : 4;
+  const size = calculateSvgSize(minutes, sidecols);
   const svg = [];
 
   svg.push(`<svg width="${size.width}" height="${size.height}" xmlns="http://www.w3.org/2000/svg">`);
   svg.push(`<g style="user-select: none; font-family: 'Arial Narrow', Arial, sans-serif;">`);
 
-  drawGrid(svg, size);
-  drawMaps(svg, minutes, mapname, mapsize);
-  drawStats(svg, minutes);
-  drawFights(svg, minutes);
-  drawClock(svg, minutes);
+  drawGrid(svg, size, sidecols);
+  drawMaps(svg, minutes, mapname, mapsize, sidecols);
+  drawStats(svg, minutes, sidecols);
+  drawFights(svg, minutes, sidecols);
+  drawClock(svg, minutes, sidecols);
   drawSeparators(svg, size, minutes);
 
   svg.push(`</g>`);
@@ -84,12 +85,12 @@ function addToMinutes(minutes, minute, point) {
   }
 }
 
-function calculateSvgSize(minutes) {
-  let width = SIZE_CELL * 4 + SIZE_MAP + SIZE_CELL * 4;
+function calculateSvgSize(minutes, sidecols) {
+  let width = SIZE_CELL * sidecols + SIZE_MAP + SIZE_CELL * sidecols;
   let height = 0;
 
   for (const minute of minutes) {
-    height += SIZE_CELL + (minute.fight ? SIZE_CELL + SIZE_CELL + SIZE_CELL : 0);
+    height += SIZE_CELL + (minute.fight ? SIZE_MAP : 0);
   }
 
   return { width, height };
@@ -99,8 +100,8 @@ function clock(minute) {
   return ((minute < 10) ? "0" + minute : minute) + ":00";
 }
 
-function drawGrid(svg, size) {
-  const a = SIZE_CELL * 4;
+function drawGrid(svg, size, sidecols) {
+  const a = SIZE_CELL * sidecols;
   const b = a + SIZE_MAP;
 
   svg.push(`<g id="grid" style="stroke: lightgray; stroke-width: 3;">`);
@@ -128,14 +129,14 @@ function drawGrid(svg, size) {
   svg.push(`</g>`);
 }
 
-function drawMaps(svg, minutes, mapname, mapsize) {
+function drawMaps(svg, minutes, mapname, mapsize, sidecols) {
   for (const minute of minutes) {
-    drawMap(svg, minute, mapname, mapsize);
+    drawMap(svg, minute, mapname, mapsize, sidecols);
   }
 }
 
-function drawMap(svg, minute, mapname, mapsize) {
-  svg.push(`<g transform="translate(${SIZE_CELL * 4}, ${minute.y + SIZE_CELL})">`);
+function drawMap(svg, minute, mapname, mapsize, sidecols) {
+  svg.push(`<g transform="translate(${SIZE_CELL * sidecols}, ${minute.y + SIZE_CELL})">`);
 
   const width = SIZE_CELL * 3;
   const height = SIZE_CELL * 3;
@@ -206,8 +207,8 @@ function drawSeparators(svg, size, minutes) {
   svg.push("</g>");
 }
 
-function drawClock(svg, minutes) {
-  const x = SIZE_CELL * 5 - 1;
+function drawClock(svg, minutes, sidecols) {
+  const x = SIZE_CELL * sidecols + SIZE_CELL - 1;
 
   svg.push(`<g id="clock" style="font-size: ${SIZE_CELL / 2}px; font-weight: bold;">`);
 
@@ -218,9 +219,9 @@ function drawClock(svg, minutes) {
   svg.push("</g>");
 }
 
-function drawStats(svg, minutes) {
-  const offsetPlayer1 = SIZE_CELL * 4;
-  const offsetPlayer2 = SIZE_CELL * 7;
+function drawStats(svg, minutes, sidecols) {
+  const offsetPlayer1 = SIZE_CELL * sidecols;
+  const offsetPlayer2 = offsetPlayer1 + SIZE_MAP;
 
   svg.push(`<g id="stats">`);
 
@@ -236,7 +237,7 @@ function drawStats(svg, minutes) {
   drawProgress(svg, minutes, 1, "activeWorkers", offsetPlayer1, -1, "#000088", "fill: none; stroke: #000088; stroke-width: 3;", iconChest);
   drawProgress(svg, minutes, 2, "activeWorkers", offsetPlayer2, +1, "#000088", "fill: none; stroke: #000088; stroke-width: 3;", iconChest);
 
-  const offsetx = SIZE_CELL * 4.1;
+  const offsetx = SIZE_CELL * sidecols + SIZE_CELL * 0.1;
   const offsetya = SIZE_CELL * 0.5;
   const offsetyah = SIZE_CELL * 0.6;
   const offsetyb = SIZE_CELL * 0.75;
@@ -334,41 +335,42 @@ function drawProgress(svg, minutes, player, resource, offset, direction, color, 
   icon(svg, startx, top + height / 2, height, height, color);
 }
 
-function drawFights(svg, minutes) {
-  const offsetPlayer1 = SIZE_CELL * 4;
-  const offsetPlayer2 = SIZE_CELL * 7;
+function drawFights(svg, minutes, sidecols) {
+  const offsetPlayer1 = SIZE_CELL * sidecols;
+  const offsetPlayer2 = offsetPlayer1 + SIZE_MAP;
 
   for (const minute of minutes) {
     if (minute.fight) {
-      drawUnits(svg, minute.y, minute.fight, 1, offsetPlayer1, -1);
-      drawUnits(svg, minute.y, minute.fight, 2, offsetPlayer2, +1);
-      drawWinnerCrown(svg, minute.y, minute.fight);
+      drawUnits(svg, sidecols, minute.y, minute.fight, 1, offsetPlayer1, -1);
+      drawUnits(svg, sidecols, minute.y, minute.fight, 2, offsetPlayer2, +1);
+      drawWinnerCrown(svg, offsetPlayer1, offsetPlayer2, minute.y, minute.fight);
     }
   }
 }
 
-function drawWinnerCrown(svg, y, fight) {
+function drawWinnerCrown(svg, offsetPlayer1, offsetPlayer2, y, fight) {
+  const halfSizeCell = SIZE_CELL * 0.5;
   const cy = y + SIZE_CELL * 0.27;
   const cr = SIZE_CELL * 0.21;
   const cs = SIZE_CELL * 0.38;
 
   if (fight.players[1].loss < fight.players[2].loss) {
-    svg.push(`<circle cx="${SIZE_CELL * 4.5}" cy="${cy}" r="${cr}" fill="#00AA00" />`);
-    iconCrown(svg, SIZE_CELL * 4.5, cy, cs, cs);
+    svg.push(`<circle cx="${offsetPlayer1 + halfSizeCell}" cy="${cy}" r="${cr}" fill="#00AA00" />`);
+    iconCrown(svg, offsetPlayer1 + halfSizeCell, cy, cs, cs);
   } else if (fight.players[1].loss > fight.players[2].loss) {
-    svg.push(`<circle cx="${SIZE_CELL * 6.5}" cy="${cy}" r="${cr}" fill="#AA0000" />`);
-    iconCrown(svg, SIZE_CELL * 6.5, cy, cs, cs);
+    svg.push(`<circle cx="${offsetPlayer2 - halfSizeCell}" cy="${cy}" r="${cr}" fill="#AA0000" />`);
+    iconCrown(svg, offsetPlayer2 - halfSizeCell, cy, cs, cs);
   }
 }
 
-function drawUnits(svg, y, fight, player, offset, direction) {
+function drawUnits(svg, sidecols, y, fight, player, offset, direction) {
   const data = fight.players[player];
   const slots = [];
 
   for (const unit in data.units) {
     slots.push({ ...data.units[unit], unit, x: 0, y: 0 });
   }
-  arrangeSlots(slots, offset, y, direction);
+  arrangeSlots(slots, sidecols, offset, y, direction);
 
   for (const slot of slots) {
     drawUnit(svg, slot);
@@ -449,7 +451,7 @@ function drawUnit(svg, slot) {
   svg.push(`</g>`);
 }
 
-function arrangeSlots(slots, x, y, direction) {
+function arrangeSlots(slots, sidecols, x, y, direction) {
   const list = { base: [], worker: [], economy: [], defense: [], offense: [] };
   let army = []; // Slots in upper two rows
   let tech = []; // Slots in lower row
@@ -490,20 +492,20 @@ function arrangeSlots(slots, x, y, direction) {
   // TODO: If no losses then keep the order of defense, worker, base, economy
   tech.sort(orderSlots);
 
-  arrangeSlotsInTwoRows(army, x, y + SIZE_CELL, direction);
-  arrangeSlotsInOneRow(tech, x, y + SIZE_CELL + SIZE_CELL + SIZE_CELL, SIZE_CELL, 4, direction);
+  arrangeSlotsInTwoRows(army, x, y + SIZE_CELL, sidecols, direction);
+  arrangeSlotsInOneRow(tech, x, y + SIZE_MAP, SIZE_CELL, sidecols, direction);
 }
 
-function arrangeSlotsInTwoRows(slots, x, y, direction) {
+function arrangeSlotsInTwoRows(slots, x, y, sidecols, direction) {
   if (!slots.length) return;
 
-  if (slots.length <= 5) {
+  if (slots.length <= sidecols) {
     // Use at least one large slot
-    arrangeSlotsInOneRow(slots, x, y, SIZE_CELL + SIZE_CELL, 2, direction);
+    arrangeSlotsInOneRow(slots, x, y, SIZE_CELL + SIZE_CELL, Math.floor(sidecols / 2), direction);
   } else {
     // Use two rows with normal slots
-    arrangeSlotsInOneRow(slots.slice(0, 4), x, y, SIZE_CELL, 4, direction);
-    arrangeSlotsInOneRow(slots.slice(4), x, y + SIZE_CELL, SIZE_CELL, 4, direction);
+    arrangeSlotsInOneRow(slots.slice(0, sidecols), x, y, SIZE_CELL, sidecols, direction);
+    arrangeSlotsInOneRow(slots.slice(sidecols), x, y + SIZE_CELL, SIZE_CELL, sidecols, direction);
   }
 }
 
