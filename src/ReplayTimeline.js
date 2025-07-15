@@ -1,4 +1,3 @@
-import { MpqFile } from "@robobays/mpq-reader";
 import csv from "./output/csv.js";
 import json from "./output/json.js";
 import svg from "./output/svg.js";
@@ -62,6 +61,9 @@ async function readReplay(source, logger) {
   logger = logger || console.error;
 
   try {
+    // Use dynamic import to allow use in Web browsers
+    const { MpqFile } = await import("@robobays/mpq-reader");
+
     const mpq = await MpqFile.load(source);
     const replay = new Replay(mpq);
 
