@@ -47,3 +47,13 @@ import ReplayTimeline from "@robobays/replay-timeline";
 
 const timeline = await ReplayTimeline.from("<path to input SC2Replay file>").json();
 ```
+
+Use the timeline as a source:
+```
+import ReplayTimeline from "@robobays/replay-timeline";
+
+const timeout = [...];
+
+// Must provide map name as format options for SVG output
+await ReplayTimeline.from(timeline).format("svg", { map: "PylonAIE.SC2Map", width: 1200 }).to("<path to output SVG file>");
+```

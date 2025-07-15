@@ -77,17 +77,26 @@ async function readReplay(source, logger) {
   }
 }
 
-async function execute({ source, type, options, logger, target }) {
-  const replay = await readReplay(source);
+async function readTimeline(source, logger) {
+  if (Array.isArray(source)) {
+    return { timeline: source };
+  } else {
+    const replay = await readReplay(source, logger);
 
+    return { map: replay.mapFileName, timeline: getTimeline(replay) };
+  }
+}
+
+async function execute({ source, type, options, logger, target }) {
   logger = logger || console.error;
 
   try {
-    options = options || {};
-    options.map = replay.mapFileName;
-
-    const timeline = getTimeline(replay);
+    const { timeline, map } = await readTimeline(source, logger);
     const formatter = FORMATTER[type] || FORMATTER.svg;
+
+    options = options || {};
+    if (map) options.map = map;
+
     const output = await formatter(timeline, options);
 
     if (!target || (target === process.stdout)) {
