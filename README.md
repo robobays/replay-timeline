@@ -40,3 +40,10 @@ For example, the following code reads from `stdin` and outputs a SVG file to `st
 ```
 ReplayTimeline.to();
 ```
+
+Get the timeline as an array:
+```
+import ReplayTimeline from "@robobays/replay-timeline";
+
+const timeline = await ReplayTimeline.from("<path to input SC2Replay file>").json();
+```

@@ -11,6 +11,10 @@ const FORMATTER = { csv, json, svg, text };
 
 class ReplayTimeline {
 
+  async json() {
+    return getTimeline(await readReplay(this.source, this.logger));
+  }
+
   log(logger) {
     this.logger = logger;
 
@@ -54,7 +58,7 @@ class ReplayTimeline {
 
 }
 
-async function execute({ source, type, options, logger, target }) {
+async function readReplay(source, logger) {
   if (source === process.stdin) source = null;
   logger = logger || console.error;
 
@@ -66,6 +70,19 @@ async function execute({ source, type, options, logger, target }) {
       logger.error(warning);
     }
 
+    return replay;
+  } catch (error) {
+    logger(error);
+    throw new Error(error.message);
+  }
+}
+
+async function execute({ source, type, options, logger, target }) {
+  const replay = await readReplay(source);
+
+  logger = logger || console.error;
+
+  try {
     options = options || {};
     options.map = replay.mapFileName;
 
