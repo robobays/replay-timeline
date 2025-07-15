@@ -1,4 +1,3 @@
-import fs from "fs";
 import { MpqFile } from "@robobays/mpq-reader";
 import csv from "./output/csv.js";
 import json from "./output/json.js";
@@ -102,6 +101,9 @@ async function execute({ source, type, options, logger, target }) {
     if (!target || (target === process.stdout)) {
       process.stdout.write(output);
     } else if (typeof(target) === "string") {
+      // Use dynamic import to allow use in Web browsers
+      const fs = await import("fs");
+
       fs.writeFileSync(target, output, "utf8");
     } else if (typeof(target) === "function") {
       await target(output);
