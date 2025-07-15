@@ -12,7 +12,8 @@ const STAT_KEYS = {
   valueKilled: "Value killed",
 };
 
-export default function(out, timeline) {
+export default function(timeline) {
+  const out = [];
   const header = ["Game time", "Game loop"];
   for (const key in STAT_KEYS) {
     header.push(STAT_KEYS[key] + " (Player 1)");
@@ -20,8 +21,7 @@ export default function(out, timeline) {
   for (const key in STAT_KEYS) {
     header.push(STAT_KEYS[key] + " (Player 2)");
   }
-  out.write(header.join(","));
-  out.write("\n");
+  out.push(header.join(","));
 
   for (const point of timeline) {
     if (point.type !== "stats") continue;
@@ -35,9 +35,10 @@ export default function(out, timeline) {
       line.push(point.players[2].resources[key]);
     }
 
-    out.write(line.join(","));
-    out.write("\n");
+    out.push(line.join(","));
   }
+
+  return out.join("\n");
 }
 
 function clock(loop) {

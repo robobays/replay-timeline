@@ -12,49 +12,54 @@ const STAT_KEYS = {
   valueKilled: "Value killed",
 };
 
-export default function(out, timeline) {
+export default function(timeline) {
+  const out = [];
+
   for (const point of timeline) {
     if (point.type === "stats") {
-      clock(out, point.start);
-      out.write(" ");
-      stats(out, point);
-      newline(out);
+      out.push(clock(point.start));
+
+      for (const key in STAT_KEYS) {
+        out.push(stats(point, key));
+      }
     }
   }
+
+  return out.join("\n");
 }
 
-function clock(out, loop) {
+function clock(loop) {
+  const line = [];
   const minutes = Math.floor(loop / LOOPS_PER_MINUTE);
   const seconds = Math.floor(loop / LOOPS_PER_SECOND) % 60;
 
-  if (minutes < 10) out.write("0");
-  out.write(String(minutes));
-  out.write(":");
-  if (seconds < 10) out.write("0");
-  out.write(String(seconds));
-  out.write("/");
-  out.write(String(loop));
+  if (minutes < 10) line.push("0");
+  line.push(minutes);
+  line.push(":");
+  if (seconds < 10) line.push("0");
+  line.push(seconds);
+  line.push("/");
+  line.push(loop);
+
+  return line.join("");
 }
 
-function newline(out) {
-  out.write("\n");
-}
-
-function text(out, value, width) {
+function text(line, value, width) {
   const text = String(value);
 
   for (let i = text.length; i < width; i++) {
-    out.write(" ");
+    line.push(" ");
   }
 
-  out.write(text);
+  line.push(text);
 }
 
-function stats(out, point) {
-  for (const key in STAT_KEYS) {
-    newline(out);
-    text(out, STAT_KEYS[key], 25);
-    text(out, point.players[1].resources[key], 10);
-    text(out, point.players[2].resources[key], 10);
-  }
+function stats(point, key) {
+  const line = [];
+
+  text(line, STAT_KEYS[key], 25);
+  text(line, point.players[1].resources[key], 10);
+  text(line, point.players[2].resources[key], 10);
+
+  return line.join("");
 }

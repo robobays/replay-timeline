@@ -4,10 +4,10 @@ const SIZE_CELL = 60;
 const SIZE_MAP = SIZE_CELL * 3;
 const SHOW_RULE_GRID = false;
 
-export default async function(out, timeline, params) {
-  if (!params.map) throw new Error("No map name is provided.");
+export default async function(timeline, options) {
+  if (!options.map) throw new Error("No map name is provided.");
 
-  const mapname = params.map.replace(".SC2Map", "");
+  const mapname = options.map.replace(".SC2Map", "");
   const mapsize = await getMapSize(mapname);
   const minutes = splitByMinute(timeline);
   const size = calculateSvgSize(minutes);
@@ -26,7 +26,7 @@ export default async function(out, timeline, params) {
   svg.push(`</g>`);
   svg.push(`</svg>`);
 
-  out.write(svg.join("\n"));
+  return svg.join("");
 }
 
 async function getMapSize(mapname) {

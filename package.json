@@ -3,7 +3,7 @@
   "description": "Translates SC2Replay file into timeline.",
   "version": "0.0.0",
   "type": "module",
-  "main": "src/index.js",
+  "main": "src/ReplayTimeline.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/robobays/replay-timeline.git"
