@@ -9,7 +9,7 @@ import getTimeline from "./timeline/timeline.js";
 
 const FORMATTER = { csv, json, svg, text };
 
-class ReplayTimeline {
+export default class ReplayTimeline {
 
   async json() {
     return getTimeline(await readReplay(this.source, this.logger));
@@ -102,5 +102,3 @@ async function execute({ source, type, options, logger, target }) {
     throw new Error(error.message);
   }
 }
-
-export default ReplayTimeline;
