@@ -9,7 +9,7 @@ export default async function(timeline, options) {
 
   const mapname = options.map.replace(".SC2Map", "");
   const mapsize = await getMapSize(mapname);
-  const minutes = splitByMinute(timeline);
+  const minutes = options.reverse ? reverseTimeline(splitByMinute(timeline)) : splitByMinute(timeline);
   const sidecols = (options.width > SIZE_MAP + SIZE_CELL * 8) ? Math.floor((options.width - SIZE_MAP) / 2 / SIZE_CELL) : 4;
   const size = calculateSvgSize(minutes, sidecols);
   const svg = [];
@@ -83,6 +83,27 @@ function addToMinutes(minutes, minute, point) {
   } else if (point.type === "stats") {
     minutes[minute].stats.push(point);
   }
+}
+
+function reverseTimeline(minutes) {
+  const reversed = JSON.parse(JSON.stringify(minutes));
+
+  for (const minute of reversed) {
+    reversePlayers(minute.fight.players);
+
+    for (const point of minute.stats) {
+      reversePlayers(point.players);
+    }
+  }
+
+  return reversed;
+}
+
+function reversePlayers(players) {
+  const player1 = players[1];
+
+  players[1] = players[2];
+  players[2] = player1;
 }
 
 function calculateSvgSize(minutes, sidecols) {
