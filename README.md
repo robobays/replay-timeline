@@ -41,6 +41,11 @@ For example, the following code reads from `stdin` and outputs a SVG file to `st
 ReplayTimeline.to();
 ```
 
+To get the file as a string, use `"string"` in place of `path to output file`:
+```
+const svgText = await ReplayTimeline.from("<path to input SC2Replay file>").format("svg").to("string");
+```
+
 Get the timeline as an array:
 ```
 import ReplayTimeline from "@robobays/replay-timeline";

@@ -57,7 +57,7 @@ export default class ReplayTimeline {
 }
 
 async function readReplay(source, logger) {
-  if (source === process.stdin) source = null;
+  if (source === stdin()) source = null;
   logger = logger || console.error;
 
   try {
@@ -102,8 +102,8 @@ async function execute({ source, type, options, logger, target }) {
 
     const output = await formatter(timeline, options);
 
-    if (!target || (target === process.stdout)) {
-      process.stdout.write(output);
+    if (target === "string") {
+      return output;
     } else if (typeof(target) === "string") {
       // Use dynamic import to allow use in Web browsers
       // The module name is as a constant to avoid issues with bundlers
@@ -113,9 +113,27 @@ async function execute({ source, type, options, logger, target }) {
       fs.writeFileSync(target, output, "utf8");
     } else if (typeof(target) === "function") {
       await target(output);
+    } else if (!target || (target === stdout())) {
+      stdout().write(output);
     }
   } catch (error) {
     logger(error);
     throw new Error(error.message);
+  }
+}
+
+function stdin() {
+  try {
+    return process.stdin;
+  } catch (_) {
+    // Allow use in Web browsers
+  }
+}
+
+function stdout() {
+  try {
+    return process.stdout;
+  } catch (_) {
+    // Allow use in Web browsers
   }
 }
