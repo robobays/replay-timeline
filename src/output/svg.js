@@ -14,7 +14,7 @@ export default async function(timeline, options) {
   const size = calculateSvgSize(minutes, sidecols);
   const svg = [];
 
-  svg.push(`<svg width="${size.width}" height="${size.height}" xmlns="http://www.w3.org/2000/svg">`);
+  svg.push(`<svg viewBox="0 0 ${size.width} ${size.height}" xmlns="http://www.w3.org/2000/svg">`);
   svg.push(`<g style="user-select: none; font-family: 'Arial Narrow', Arial, sans-serif;">`);
 
   drawGrid(svg, size, sidecols);
