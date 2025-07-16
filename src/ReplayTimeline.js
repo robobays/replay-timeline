@@ -62,7 +62,9 @@ async function readReplay(source, logger) {
 
   try {
     // Use dynamic import to allow use in Web browsers
-    const { MpqFile } = await import("@robobays/mpq-reader");
+    // The module name is as a constant to avoid issues with bundlers
+    const MODULE_MPQ_READER = "@robobays/mpq-reader";
+    const { MpqFile } = await import(MODULE_MPQ_READER);
 
     const mpq = await MpqFile.load(source);
     const replay = new Replay(mpq);
@@ -104,7 +106,9 @@ async function execute({ source, type, options, logger, target }) {
       process.stdout.write(output);
     } else if (typeof(target) === "string") {
       // Use dynamic import to allow use in Web browsers
-      const fs = await import("fs");
+      // The module name is as a constant to avoid issues with bundlers
+      const MODULE_FS = "fs";
+      const fs = await import(MODULE_FS);
 
       fs.writeFileSync(target, output, "utf8");
     } else if (typeof(target) === "function") {
