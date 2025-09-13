@@ -75,7 +75,7 @@ function processFight(replay, fight) {
     if ((unit.owner !== 1) && (unit.owner !== 2)) continue;
 
     const player = players[unit.owner];
-    const type = UnitType[unit.type];
+    const type = UnitType[unit.getType(fight.end)];
 
     if (!type) continue;
 

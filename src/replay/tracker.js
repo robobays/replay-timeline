@@ -105,7 +105,7 @@ function readUnitTypeChangeEvent(events, replay, loop, data) {
   const unit = replay.unit(unitTag);
 
   if (unit) {
-    unit.type = type;
+    unit.morph(loop, type);
 
     events(new Event(Event.Morph, loop, unit.owner, unitTag));
   }
