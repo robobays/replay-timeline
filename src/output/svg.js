@@ -7,7 +7,7 @@ const SHOW_RULE_GRID = false;
 export default async function(timeline, options) {
   if (!options.map) throw new Error("No map name is provided.");
 
-  const mapname = options.map.replace(".SC2Map", "");
+  const mapname = getMapName(options.map);
   const mapsize = await getMapSize(mapname);
   const minutes = options.reverse ? reverseTimeline(splitByMinute(timeline)) : splitByMinute(timeline);
   const sidecols = (options.width > SIZE_MAP + SIZE_CELL * 8) ? Math.floor((options.width - SIZE_MAP) / 2 / SIZE_CELL) : 4;
@@ -28,6 +28,12 @@ export default async function(timeline, options) {
   svg.push(`</svg>`);
 
   return svg.join("");
+}
+
+function getMapName(filename) {
+  const index = filename.indexOf("AIE");
+
+  return (index > 0) ? filename.substring(0, index) + "AIE" : filename;
 }
 
 async function getMapSize(mapname) {
