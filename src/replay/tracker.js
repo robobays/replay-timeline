@@ -1,5 +1,6 @@
 import Event from "./event.js";
 import Unit from "./unit.js";
+import Upgrade from "./upgrade.js";
 
 export default function readTrackerEvents(events, replay, decoder) {
   try {
@@ -27,7 +28,7 @@ function readTrackerEvent(events, replay, loop, type, data) {
     case 2: return readUnitDiedEvent(events, replay, loop, data);
     case 3: return readUnitOwnerChangeEvent();
     case 4: return readUnitTypeChangeEvent(events, replay, loop, data);
-    case 5: return readUpgradeCompleteEvent(events, loop, data);
+    case 5: return readUpgradeCompleteEvent(events, replay, loop, data);
     case 6: return readUnitInitEvent(replay, loop, data);
     case 7: return readUnitDoneEvent(events, replay, loop, data);
     case 8: return readUnitPositionsEvent();
@@ -111,13 +112,15 @@ function readUnitTypeChangeEvent(events, replay, loop, data) {
   }
 }
 
-function readUpgradeCompleteEvent(events, loop, data) {
+function readUpgradeCompleteEvent(events, replay, loop, data) {
   const player = data["0"];
   const upgrade = data["1"].toString("utf8");
 
   if (upgrade === "SprayProtoss") return;
   if (upgrade === "SprayTerran") return;
   if (upgrade === "SprayZerg") return;
+
+  replay.upgrades.add(new Upgrade(player, upgrade, loop));
 
   events(new Event(Event.Enter, loop, player, upgrade));
 }

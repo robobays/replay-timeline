@@ -394,13 +394,23 @@ function drawUnits(svg, sidecols, y, fight, player, offset, direction) {
   const data = fight.players[player];
   const slots = [];
 
+  for (const upgrade in data.upgrades) {
+    slots.push({ type: "upgrade", upgrade, x: 0, y: 0 });
+  }
   for (const unit in data.units) {
     slots.push({ ...data.units[unit], unit, x: 0, y: 0 });
   }
+
   arrangeSlots(slots, sidecols, offset, y, direction);
 
   for (const slot of slots) {
-    drawUnit(svg, slot);
+    if (!slot.unit && !slot.upgrade) {
+      drawDots(svg, slot);
+    } else if (slot.type === "upgrade") {
+      drawUpgrade(svg, slot);
+    } else {
+      drawUnit(svg, slot);
+    }
   }
 }
 
@@ -408,16 +418,6 @@ function drawUnit(svg, slot) {
   const c = slot.w;
 
   svg.push(`<g transform="translate(${slot.x}, ${slot.y})">`);
-
-  if (!slot.unit) {
-    const mx = c / 4;
-    const dx = 0.001;
-    const style = `fill: none; stroke: gray; stroke-width: ${c / 7}; stroke-linecap: round;`;
-
-    svg.push(`<path d="m${mx},${c / 2} l${dx},0 m${mx},0 l${dx},0 m${mx},0 l${dx},0" style="${style}" />`);
-    svg.push("</g>");
-    return;
-  }
 
   const srcicon = "https://robobays.github.io/images/unit/" + slot.unit + ".webp";
   const stylerounded = "clip-path: inset(0 0 0 0 round 20%)";
@@ -478,14 +478,48 @@ function drawUnit(svg, slot) {
   svg.push(`</g>`);
 }
 
+function drawUpgrade(svg, slot) {
+  const c = slot.w;
+
+  svg.push(`<g transform="translate(${slot.x}, ${slot.y})">`);
+
+  if (!slot.upgrade.endsWith("1") && !slot.upgrade.endsWith("2") && !slot.upgrade.endsWith("3")) {
+    const srcicon = "https://robobays.github.io/images/upgrade/" + slot.upgrade + ".webp";
+    const stylerounded = "clip-path: inset(0 0 0 0 round 20%)";
+
+    // Count and image on top
+    svg.push(`<image x="${c*0.15}" y="${c*0.15}" width="${c*0.7}" height="${c*0.7}" href="${srcicon}" style="${stylerounded}" />`);
+  } else {
+    svg.push(`<rect x="${c*0.15}" y="${c*0.15}" width="${c*0.7}" height="${c*0.7}" fill="black" rx="${c*0.1}" ry="${c*0.1}" />`);
+  }
+
+  // Gray outline with title
+  svg.push(`<rect width="${c}" height="${c}" rx="${c * 0.1}" ry="${c * 0.1}" stroke="gray" stroke-width="${c * 0.01}" fill="rgba(0, 0, 0, 0.01)">`);
+  svg.push(`<title>${slot.upgrade}</title>`);
+  svg.push(`</rect>`);
+
+  svg.push(`</g>`);
+}
+
+function drawDots(svg, slot) {
+  const c = slot.w;
+  const mx = c / 4;
+  const dx = 0.001;
+  const style = `fill: none; stroke: gray; stroke-width: ${c / 7}; stroke-linecap: round;`;
+
+  svg.push(`<g transform="translate(${slot.x}, ${slot.y})">`);
+  svg.push(`<path d="m${mx},${c / 2} l${dx},0 m${mx},0 l${dx},0 m${mx},0 l${dx},0" style="${style}" />`);
+  svg.push("</g>");
+}
+
 function arrangeSlots(slots, sidecols, x, y, direction) {
-  const list = { base: [], worker: [], economy: [], defense: [], offense: [] };
+  const list = { base: [], worker: [], economy: [], defense: [], offense: [], upgrade: [] };
   let army = []; // Slots in upper two rows
   let tech = []; // Slots in lower row
 
   for (const slot of slots) list[slot.type].push(slot);
 
-  army = list.offense;
+  army = [...list.upgrade, ...list.offense];
 
   if (!army.length) {
     army = list.defense;

@@ -1,4 +1,5 @@
 import UnitType from "./unit-type.js";
+import UpgradeType from "./upgrade-type.js";
 import Event from "../replay/event.js";
 
 const STATS_LOOPS = 160;
@@ -66,9 +67,22 @@ function processStats(stats) {
 
 function processFight(replay, fight) {
   const players = {
-    1: { bases: [], units: {}, value: 0, loss: 0, zones: [] },
-    2: { bases: [], units: {}, value: 0, loss: 0, zones: [] },
+    1: { bases: [], upgrades: {}, units: {}, value: 0, loss: 0, zones: [] },
+    2: { bases: [], upgrades: {}, units: {}, value: 0, loss: 0, zones: [] },
   };
+
+  for (const upgrade of replay.upgrades) {
+    if ((upgrade.enter < fight.start) || (upgrade.enter >= fight.end)) continue;
+    if ((upgrade.owner !== 1) && (upgrade.owner !== 2)) continue;
+
+    const player = players[upgrade.owner];
+    const type = UpgradeType[upgrade.type];
+
+    if (!type) replay.warning(`Unknown upgrade: ${upgrade.type}`);
+    if (!type) continue;
+
+    player.upgrades[type.name] = (player.upgrades[type.name] || 0) + 1;
+  }
 
   for (const unit of replay.units.values()) {
     if ((unit.exit < fight.start) || (unit.enter >= fight.end)) continue;

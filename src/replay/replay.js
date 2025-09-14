@@ -8,6 +8,7 @@ export default class Replay {
   order = { 1: {}, 2: {} };
   events = [];
   units = new Map();
+  upgrades = new Set();
   warnings = new Set();
 
   constructor(mpq) {
