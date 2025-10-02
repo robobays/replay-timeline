@@ -483,15 +483,11 @@ function drawUpgrade(svg, slot) {
 
   svg.push(`<g transform="translate(${slot.x}, ${slot.y})">`);
 
-  if (!slot.upgrade.endsWith("1") && !slot.upgrade.endsWith("2") && !slot.upgrade.endsWith("3")) {
-    const srcicon = "https://robobays.github.io/images/upgrade/" + slot.upgrade + ".webp";
-    const stylerounded = "clip-path: inset(0 0 0 0 round 20%)";
+  // Upgrade image
+  const srcicon = "https://robobays.github.io/images/upgrade/" + slot.upgrade + ".webp";
+  const stylerounded = "clip-path: inset(0 0 0 0 round 20%)";
 
-    // Count and image on top
-    svg.push(`<image x="${c*0.15}" y="${c*0.15}" width="${c*0.7}" height="${c*0.7}" href="${srcicon}" style="${stylerounded}" />`);
-  } else {
-    svg.push(`<rect x="${c*0.15}" y="${c*0.15}" width="${c*0.7}" height="${c*0.7}" fill="black" rx="${c*0.1}" ry="${c*0.1}" />`);
-  }
+  svg.push(`<image x="${c*0.15}" y="${c*0.15}" width="${c*0.7}" height="${c*0.7}" href="${srcicon}" style="${stylerounded}" />`);
 
   // Gray outline with title
   svg.push(`<rect width="${c}" height="${c}" rx="${c * 0.1}" ry="${c * 0.1}" stroke="gray" stroke-width="${c * 0.01}" fill="rgba(0, 0, 0, 0.01)">`);
